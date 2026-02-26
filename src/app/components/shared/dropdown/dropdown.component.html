@@ -1,0 +1,30 @@
+<div class="custom-dropdown" [class.open]="isOpen" (click)="$event.stopPropagation()" [attr.aria-label]="ariaLabel">
+  <div class="selected-value"
+       (click)="toggleDropdown()"
+       (keydown.enter)="toggleDropdown()"
+       (keydown.space)="toggleDropdown(); $event.preventDefault()"
+       tabindex="0"
+       role="button"
+       aria-haspopup="listbox"
+       [attr.aria-expanded]="isOpen">
+    {{ selectedOption }}
+    <span class="dropdown-arrow" [class.open]="isOpen" aria-hidden="true">&#9662;</span>
+  </div>
+  @if (isOpen) {
+    <ul class="dropdown-list" role="listbox">
+      @for (option of options; track trackByFn($index, option)) {
+        <li 
+          (click)="selectOption(option)"
+          [class.selected]="option === selectedOption"
+          role="option"
+          [attr.aria-selected]="option === selectedOption"
+          [attr.data-value]="option"
+          (keydown.enter)="selectOption(option)"
+          (keydown.space)="selectOption(option); $event.preventDefault()"
+          tabindex="0">
+          {{ option }}
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -1,0 +1,154 @@
+<div class="container">
+	<div class="row title-row-mb-3 text-center">
+		<div class="col-12">
+			<h2 class="purple-color">Choose Your Composing Plan</h2>
+		</div>
+		<div class="col-12">
+			<p class="white-color">Start creating today with our flexible pricing options</p>
+		</div>
+		<div class="col-12">
+			<button class="btn primary-button" (click)="openCreditInfoModal()">
+				<i class="fas fa-coins me-2"></i>How Credits Work
+			</button>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-12 center-h">
+			<div class="center-v column-gap-20 row-gap-20">
+				<div class="pricing-box">
+					<div>
+						<p class="pricing-title">Free</p>
+						<p class="mb-0">Perfect for getting started</p>
+					</div>
+					<h2 class="bold white-color mb-0">
+						€ 0
+					</h2>
+						<ul class="checks-svg white-color">
+							<li>10 credits daily</li>
+							<li>Save up to 50 melodies</li>
+							<li>Major and minor scale</li>
+							<li>All keys</li>
+							<li>2 or 4 bars</li>
+							<li>Low complexity</li>
+							<li>4/4 beat</li>
+							<li class="prohibition">No MIDI/XML export</li>
+							<li class="prohibition">No commercial use</li>
+							<li class="prohibition">No email support</li>
+						</ul>
+					<button class="btn btn-light" (click)="choosePlan('free')">Get Started</button>
+				</div>
+				<div class="pricing-box dark-bg most-popular relative">
+					<div class="most-popular-badge absolute most-popular-badge-pricing">Most Popular</div>
+					<div>
+						<p class="pricing-title">Pro</p>
+						<p class="mb-0">For serious creators</p>
+					</div>
+					<h2 class="bold white-color mb-0">
+						€ 9 <span class="bold text-small body-color">/ month*</span>
+					</h2>
+					<ul class="checks-svg white-color">
+						<li>1000 credits monthly</li>
+						<li>Save up to 200 melodies</li>
+						<li>All scales</li>
+						<li>All keys</li>
+						<li>2, 4, or 8 bars</li>
+						<li>Low, medium and high complexity</li>
+						<li>All beats</li>
+						<li>MIDI/XML export</li>
+						<li>Commercial license
+							<div class="custom-tooltip inline-block ms-2">
+								<i class="fas fa-info-circle fa-lg white-color hand" (click)="showCommercialLicenseAgreement()"></i>
+								<span class="tooltiptext">Commercial License Agreement</span>
+							</div>
+						</li>
+						<li>Email support</li>
+					</ul>
+					<button class="btn primary-button" (click)="choosePlan('pro')">Start Pro Plan</button>
+				</div>
+				<div class="pricing-box">
+					<div>
+						<p class="pricing-title">Enterprise</p>
+						<p class="mb-0">For teams and studios</p>
+					</div>
+					<h2 class="bold white-color mb-0">
+						€ 19 <span class="bold text-small body-color">/ month*</span>
+					</h2>
+					<ul class="checks-svg white-color">
+						<li>3000 credits monthly</li>
+						<li>Save up to 500 melodies</li>
+						<li>All scales</li>
+						<li>All keys</li>
+						<li>2, 4, or 8 bars</li>
+						<li>Low, medium and high complexity</li>
+						<li>All beats</li>
+						<li>MIDI/XML export</li>
+						<li>Commercial license
+							<div class="custom-tooltip inline-block ms-2">
+								<i class="fas fa-info-circle fa-lg white-color hand" (click)="showCommercialLicenseAgreement()"></i>
+								<span class="tooltiptext">Commercial License Agreement</span>
+							</div>
+						</li>
+						<li>Email support</li>
+					</ul>
+					<button class="btn btn-light" (click)="choosePlan('enterprise')">Start Enterprise Plan</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 text-center mt-1">
+			<p class="no-margin">*one time payment, no subscription</p>
+		</div>
+	</div>
+
+	@if (userIsNotAuthenticated) {
+		<div class="row mt-4">
+			<div class="col-12 center-h">
+				<div class="badge-orange alert-box" role="alert">
+					<p class="mb-0">You must first <a class="hyperlink-white" routerLink="/auth/signup">create an
+							account</a> and <a class="hyperlink-white" routerLink="/auth/login">log in</a> before you
+						can take out a paid subscription or purchase credits.</p>
+				</div>
+			</div>
+		</div>
+	}
+
+	<div class="row title-row mt-5 text-center">
+		<div class="col-12">
+			<h2 class="purple-color">Need More Credits?</h2>
+		</div>
+		<div class="col-12">
+			<p class="white-color">Purchase additional credits whenever you need them</p>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-12 center-h">
+			<div class="center-v column-gap-20 row-gap-20">
+				<div class="pricing-box">
+					<div class="flex-space-between">
+						<h2 class="bold purple-color"><i class="fas fa-coins me-2 purple-color"></i>500</h2>
+						<h2 class="white-color">€ 2,49</h2>
+					</div>
+					<button class="btn primary-button" (click)="choosePlan('free')">Buy Now</button>
+				</div>
+				<div class="pricing-box">
+					<div class="flex-space-between">
+						<h2 class="bold purple-color"><i class="fas fa-coins me-2 purple-color"></i>1000</h2>
+						<h2 class="white-color">€ 4,49</h2>
+					</div>
+					<button class="btn primary-button" (click)="choosePlan('free')">Buy Now</button>
+				</div>
+				<div class="pricing-box relative">
+					<div class="best-value-badge">
+						Best Value
+					</div>
+					<div class="flex-space-between">
+						<h2 class="bold purple-color"><i class="fas fa-coins me-2 purple-color"></i>2000</h2>
+						<h2 class="white-color">€ 7,99</h2>
+					</div>
+					<button class="btn primary-button" (click)="choosePlan('free')">Buy Now</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

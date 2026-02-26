@@ -1,0 +1,56 @@
+h1 {
+  font-size: 4rem;
+  line-height: 1.15;
+  padding-bottom: 0.1em;
+}
+
+.my-auto {
+  background-color: var(--background-color-3);
+}
+
+.header-title { 
+  max-width: 40rem;
+  width: 100%;
+}
+
+.container {
+  min-height: 0;
+}
+
+.dark-bg {
+  background-color: var(--background-color);
+}
+
+.dark-bg-2 {
+  background-color: var(--background-color-3);
+}
+
+ul {
+  margin: 0;
+}
+
+ul li:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.table {
+  border: 1px solid var(--border-color);
+  margin-bottom: 0;
+}
+
+.table > :not(caption) > * > * {
+  color: #fff;
+  background-color: var(--background-color-2);
+  padding: 20px;
+}
+
+.table > :not(caption) > * > th {
+  background-color: var(--background-color);
+  font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .header-title {
+    font-size: clamp(2rem, 10vw, 4rem);
+  }
+}

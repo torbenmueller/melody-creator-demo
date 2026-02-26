@@ -1,0 +1,9 @@
+h3 {
+  /* font-family: 'Amatic SC', cursive; */
+  font-size: 3rem;
+  margin: 0;
+}
+
+.container {
+  min-height: 0;
+}

@@ -1,0 +1,45 @@
+.navbar-custom {
+	background-color: var(--background-color);
+	border-bottom: 1px solid var(--border-color);
+	height: 70px;
+}
+
+/* change the brand and text color */
+.navbar-custom .navbar-brand,
+.navbar-custom .navbar-text {
+	color: rgba(255, 255, 255, .8);
+}
+
+/* change the link color */
+.navbar-custom .navbar-nav .nav-link {
+	color: rgba(255, 255, 255, .5);
+}
+
+/* change the color of active or hovered links */
+.navbar-custom .nav-item.active .nav-link,
+.navbar-custom .nav-item:hover .nav-link {
+	color: #fff;
+}
+
+.navbar-toggler {
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+}
+
+.navbar-toggler:focus {
+	box-shadow: none;
+}
+
+.custom-toggler .navbar-toggler-icon {
+	background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
+}
+
+.nav-item {
+	margin-right: 1rem;
+}
+
+.modal {
+	--bs-modal-header-border-width: 0;
+	--bs-modal-footer-border-width: 0;
+}

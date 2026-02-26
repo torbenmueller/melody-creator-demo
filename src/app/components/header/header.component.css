@@ -1,0 +1,46 @@
+h1 {
+	font-size: 4rem;
+	line-height: 1.15;
+	padding-bottom: 0.1em;
+}
+
+.image-top {
+	/* height: 25vh; */
+	/* height: 15rem; */
+	height: 20rem;
+}
+
+/* .header-title {
+	width: 40rem
+} */
+
+.header-title { 
+	max-width: 40rem;
+	width: 100%;
+}
+
+.container {
+	min-height: 0;
+}
+
+.container img {
+	animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-10px); }
+}
+
+@media (max-width: 600px) {
+	.image-top {
+		max-width: 37%;
+		height: auto;
+	}
+}
+
+@media (max-width: 768px) {
+	.header-title {
+		font-size: clamp(2rem, 10vw, 4rem);
+	}
+}

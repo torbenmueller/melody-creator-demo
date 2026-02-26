@@ -1,0 +1,62 @@
+<div class="container center-h">
+  <div class="form-signin">
+    <div class="text-center mb-32">
+      <div class="icon-container">
+        <i class="fas fa-sign-in-alt sign-in-icon"></i>
+      </div>
+      <h1 class="h3">Welcome Back</h1>
+      <p class="white-color">Sign in to continue creating melodies</p>
+    </div>
+    <form (submit)="onLogin(loginForm)" #loginForm="ngForm" class="features-box bg-color-2 mb-32">
+      <div>
+        <label for="floatingEmail" class="form-label">Email address</label>
+        <input name="email" type="email" ngModel class="form-control" id="floatingEmail" placeholder="E-Mail"
+          #emailInput="ngModel" required>
+          @if (!emailInput.valid && emailInput.touched) {
+            <span class="password-hints">Please enter a valid email!</span>
+          }
+        </div>
+        <div>
+          <label for="floatingPassword" class="form-label">Password</label>
+          <div class="relative">
+            <input name="password" [type]="showPassword ? 'text' : 'password'" ngModel
+              class="form-control password-input" id="floatingPassword" placeholder="Password"
+              #passwordInput="ngModel" required>
+              <i [class]="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'" class="show-password-icon"
+              (click)="togglePasswordVisibility()"></i>
+            </div>
+            @if (!passwordInput.valid && passwordInput.touched) {
+              <span class="password-hints">Please enter a password!</span>
+            }
+            <div class="text-center mt-2">
+              <a class="link" routerLink="/auth/forgot-password">Forgot password?</a>
+            </div>
+          </div>
+          <button class="w-100 btn btn-lg primary-button" type="submit" [disabled]="isLoading">Sign In</button>
+          @if (isLoading) {
+            <div class="text-center">
+              <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
+          }
+          @if (!isAuthenticated) {
+            <p class="text-center danger-color">Wrong email address or password</p>
+          }
+          @if (!emailIsConfirmed) {
+            <div class="text-center">
+              <p class="mb-0 white-color">Didn't receive a verification email?</p>
+              <button class="btn btn-link link p-0" type="button" (click)="onResendActivation(loginForm.value.email)" [disabled]="resendLoading || !loginForm.value.email">
+                @if (!resendLoading) {
+                  <span>Resend activation link</span>
+                }
+                @if (resendLoading) {
+                  <span><i class="fas fa-spinner fa-spin"></i> Sending...</span>
+                }
+              </button>
+            </div>
+          }
+        </form>
+        <p class="mb-0 text-center">Don't have an account? <a class="link" routerLink="/auth/signup">Sign Up</a></p>
+      </div>
+    </div>

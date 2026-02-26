@@ -1,0 +1,9 @@
+.btn:focus {
+	outline: none;
+	box-shadow: none;
+}
+
+.mat-mdc-dialog-actions {
+	padding: 0 24px 24px;
+	justify-content: flex-end;
+}

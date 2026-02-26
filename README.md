@@ -35,13 +35,13 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 ## Setup
 
 ### Backend
-cd backend
-npm install
-nodemon
+- cd backend
+- npm install
+- nodemon
 
 ### Frontend
-npm install
-ng serve
+- npm install
+- ng serve
 
 ## Features
 - Authentication

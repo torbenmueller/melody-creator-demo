@@ -1,5 +1,4 @@
 // Musical modes and key calculations
-// Ported from frontend modes.ts
 
 class Modes {
 	static SHARP_KEYS = ["G", "D", "A", "E", "B", "F#"];

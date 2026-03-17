@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-
 import { FormsModule, NgForm } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../auth.service';
@@ -46,9 +45,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
     this.isLoading = true;
     this.authService.loginUser(form.value.email, form.value.password).subscribe({
-      next: () => {
-        console.log('Login successful');
-      },
+      next: () => {},
       error: (err) => {
         this.toastr.error('Login failed: ' + err.error.message);
         if (err?.status === 403 && err.error?.message && err.error.message.toLowerCase().includes('verify')) {

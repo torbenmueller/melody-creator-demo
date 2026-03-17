@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subscription, Subject, of } from 'rxjs';
@@ -18,11 +18,12 @@ import { RouterLink } from '@angular/router';
     selector: 'app-user-profile',
     imports: [CommonModule, FormsModule, DatePipe, RouterLink],
     templateUrl: './user-profile.component.html',
-    styleUrl: './user-profile.component.css'
+    styleUrl: './user-profile.component.css',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserProfileComponent implements OnInit, OnDestroy {
   private userSub!: Subscription;
-  private modesSub!: Subscription;
+  private modesSub?: Subscription;
   private melodiesSub!: Subscription;
   private emailCheckSub?: Subscription;
   private emailInput$ = new Subject<string>();
@@ -64,8 +65,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.purchased) {
-        // Handle successful purchase
-        console.log('Credits purchased:', result.amount);
         // Refresh user data to show updated credits
         this.loadUserData();
       }
@@ -78,10 +77,31 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     public authService: AuthService,
     private dialog: MatDialog,
     private toastr: ToastrService,
-    private stringUtils: StringUtilsService
+    private stringUtils: StringUtilsService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.userSub = this.userService.user$.subscribe((u: User | null) => {
+      if (u) {
+        this.user = u;
+        this.currentEmail = u.email;
+        this.newEmail = u.email;
+        this.userPlan = this.stringUtils.capitalizeFirstLetter(u.plan ?? '');
+        this.cdr.markForCheck();
+      }
+    });
+
+    this.melodiesSub = this.creationService
+      .getMelodiesUpdateListener()
+      .subscribe((data: { melodies: any; melodiesCount: number }) => {
+        this.melodies = data.melodies;
+        this.totalMelodies = data.melodiesCount;
+        this.latestMelodies = this.melodies.slice(0, 3);
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      });
+
     this.loadUserData();
 
     // Debounced email availability check
@@ -107,6 +127,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         this.checkingEmail = false;
         this.emailAvailable = !!res.available;
         this.emailAvailabilityMessage = res.message || (this.emailAvailable ? 'Email available' : 'Email already in use');
+        this.cdr.markForCheck();
       });
   }
 
@@ -124,40 +145,25 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   getUser() {
-    // Subscribe to user updates
-    this.userSub = this.userService.user$.subscribe((u: User | null) => {
-      if (u) {
-        this.user = u;
-        this.currentEmail = u.email;
-        this.newEmail = u.email;
-        this.userPlan = this.stringUtils.capitalizeFirstLetter(u.plan ?? '');
-      }
+    this.userService.getUser(true).subscribe({
+      error: () => this.cdr.markForCheck()
     });
-
-    // Request user from backend if not cached
-    if (!this.userService.getCurrentUser()) {
-      this.userService.getUser().subscribe();
-    }
   }
 
   getMelodies() {
     this.isLoading = true;
-    this.creationService.getMelodies(10, 1, 'time', -1);
-    this.melodiesSub = this.creationService
-      .getMelodiesUpdateListener()
-      .subscribe((data: { melodies: any; melodiesCount: number }) => {
-        this.melodies = data.melodies;
-        this.totalMelodies = data.melodiesCount;
-        this.latestMelodies = this.melodies.slice(0, 3);
+    this.creationService.getMelodies(10, 1, 'time', -1).subscribe({
+      error: () => {
         this.isLoading = false;
-      });
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   getModes() {
-    this.userService.getModes();
-    this.modesSub = this.userService
-      .getModesUpdateListener()
-      .subscribe((data: { message: string; modes: any }) => {
+    this.modesSub?.unsubscribe();
+    this.modesSub = this.userService.getModes().subscribe({
+      next: (data: { message: string; modes: any }) => {
         this.modes = Object.entries(data.modes.modeValues).sort((a: [string, any], b: [string, any]) => {
           const av = typeof a[1] === 'number' ? a[1] : Number(a[1]);
           const bv = typeof b[1] === 'number' ? b[1] : Number(b[1]);
@@ -165,7 +171,10 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         });
         this.numberOfModes = Object.keys(this.modes).length;
         this.modesMaxValue = data.modes.maxValue;
-      });
+        this.cdr.markForCheck();
+      },
+      error: () => this.cdr.markForCheck()
+    });
   }
 
   openConfirmationDialog(): void {
@@ -240,12 +249,14 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.authService.updatePassword(form.value.password, form.value.newpassword).subscribe({
       next: () => {
         this.toastr.success('Password successfully changed');
+        this.cdr.markForCheck();
       },
       error: (err) => {
         if (err && (err.status === 429)) {
           this.passwordChangeRequestsLimitReached = true;
         }
         this.toastr.error(err.error.message);
+        this.cdr.markForCheck();
       }
     });
   }

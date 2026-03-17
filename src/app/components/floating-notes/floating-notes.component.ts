@@ -465,7 +465,6 @@ ngAfterViewInit(): void {
   window.addEventListener('resize', resize);
 
   const count = this.getParticleCount();
-  console.log(`Initializing ${count} floating particles`);
   this.particles = Array.from({ length: count }, () => ({
     x: Math.random() * this.canvasWidth,
     y: Math.random() * this.canvasHeight,

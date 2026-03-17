@@ -495,8 +495,18 @@ exports.getUser = async (req, res, next) => {
 		
 		await checkAndDowngradeExpiredPlan(user);
 		await refreshDailyCreditsIfNeeded(user);
-		
-		res.send(user);
+
+		return res.status(200).json({
+			userId: user._id,
+			email: user.email,
+			plan: user.plan,
+			planValidUntil: user.planValidUntil,
+			isEmailVerified: user.isEmailVerified,
+			creditsPermanent: user.creditsPermanent,
+			creditsDaily: user.creditsDaily,
+			creditsDailyExpiresAt: user.creditsDailyExpiresAt,
+			time: user.time
+		});
 	} catch (error) {
 		console.error('getUser error:', error);
 		errorResponses.serverError(res);

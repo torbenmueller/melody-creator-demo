@@ -21,4 +21,15 @@ const melodySchema = mongoose.Schema({
 	plan: { type: String, enum: ['free', 'pro', 'enterprise'], default: 'free' }
 });
 
+// Primary list query path: filter by creator and sort by date.
+melodySchema.index({ creator: 1, time: -1 });
+
+// Support creator-scoped sorting options used by the UI.
+melodySchema.index({ creator: 1, plan: 1 });
+melodySchema.index({ creator: 1, 'settings.name': 1 });
+melodySchema.index({ creator: 1, 'settings.key': 1 });
+melodySchema.index({ creator: 1, 'settings.bar': 1 });
+melodySchema.index({ creator: 1, 'settings.complex': 1 });
+melodySchema.index({ creator: 1, 'settings.beat': 1 });
+
 module.exports = mongoose.model('Melody', melodySchema);

@@ -9,8 +9,8 @@ import {
 	FetchedMelody, 
 	MelodiesResponse 
 } from '../interfaces/melody-model';
-import { Observable, Subject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, Subject, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
@@ -64,20 +64,20 @@ export class CreationService implements OnDestroy {
 		return this.http.post<{message: string}>(BACKEND_URL, post);
 	}
 
-	getMelodies(melodiesPerPage: number, currentPage: number, sortByType: string, order: number ) {
+	getMelodies(melodiesPerPage: number, currentPage: number, sortByType: string, order: number): Observable<MelodiesResponse> {
 		const queryParams = `?pagesize=${melodiesPerPage}&page=${currentPage}&sort_by_type=${sortByType}&order=${order}`;
-		this.http.get<MelodiesResponse>(BACKEND_URL + queryParams)
-			.subscribe({
-				next: (data) => {
-					this.fetchedMelodies = data.melodies;
-					this.maxMelodies = data.maxMelodies;
-					this.melodiesUpdated.next({melodies: this.fetchedMelodies, melodiesCount: this.maxMelodies});
-				},
-				error: (error) => {
-					console.error('Error fetching melodies:', error);
-					this.melodiesUpdated.next({melodies: [], melodiesCount: 0});
-				}
-			});
+		return this.http.get<MelodiesResponse>(BACKEND_URL + queryParams).pipe(
+			tap((data) => {
+				this.fetchedMelodies = data.melodies;
+				this.maxMelodies = data.maxMelodies;
+				this.melodiesUpdated.next({ melodies: this.fetchedMelodies, melodiesCount: this.maxMelodies });
+			}),
+			catchError((error) => {
+				console.error('Error fetching melodies:', error);
+				this.melodiesUpdated.next({ melodies: [], melodiesCount: 0 });
+				return throwError(() => error);
+			})
+		);
 	}
 
 	getMidiFile(id: string): Observable<HttpResponse<ArrayBuffer>> {

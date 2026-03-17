@@ -50,7 +50,6 @@ export class AuthService {
         try {
           this.toastr.success('Account created. A verification email has been sent, please check your inbox and click Verify Email to confirm your address.');
         } catch (e) {
-          console.warn('Toastr error', e);
         }
         this.router.navigate(['/auth/login']);
       },

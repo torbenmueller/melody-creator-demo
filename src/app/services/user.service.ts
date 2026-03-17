@@ -16,7 +16,6 @@ export class UserService {
   private user = new BehaviorSubject<User | null>(null);
   public readonly user$ = this.user.asObservable();
   private inFlightRequest: Observable<User> | null = null;
-  private modes = new Subject<{message: string, modes: any}>();
   
   // Subject for broadcasting credit updates
   private creditUpdateSubject = new Subject<void>();
@@ -26,11 +25,9 @@ export class UserService {
     private http: HttpClient
   ) { }
 
-  /**
-   * Fetch user from backend. Returns an observable that emits the user.
-   * Uses an in-flight guard to avoid duplicate concurrent requests and
-   * updates the internal BehaviorSubject when the HTTP call succeeds.
-   */
+  // Fetch user from backend. Returns an observable that emits the user.
+  // Uses an in-flight guard to avoid duplicate concurrent requests and
+  // updates the internal BehaviorSubject when the HTTP call succeeds.
   getUser(forceReload = false): Observable<User> {
     const cached = this.getCurrentUser();
     if (cached && !forceReload) {
@@ -52,9 +49,7 @@ export class UserService {
     return this.inFlightRequest;
   }
 
-  /**
-   * Return the current cached user value (or null if none).
-   */
+  // Return the current cached user value (or null if none).
   getCurrentUser() {
     return this.user.getValue();
   }
@@ -63,45 +58,33 @@ export class UserService {
     return this.user.asObservable();
   }
 
-  getModes() {
-    return this.http.get<{message: string, modes: any}>(BACKEND_URL + "/melodies/modes")
-			.subscribe((data) => {
-        this.modes.next(data);
-			});
-  }
-
-  getModesUpdateListener() {
-    return this.modes.asObservable();
+  getModes(): Observable<{ message: string; modes: any }> {
+    return this.http.get<{ message: string; modes: any }>(BACKEND_URL + '/melodies/modes');
   }
 
   checkEmail(email: string) {
     return this.http.get<{available: boolean, message?: string}>(BACKEND_URL + "/user/check-email?email=" + encodeURIComponent(email));
   }
 
-  /**
-   * Fetches the user's plan information to determine feature restrictions.
-   * Returns whether the user is authenticated and if they have restrictions (free or unauthenticated).
-   */
+  
+  // Fetches the user's plan information to determine feature restrictions.
+  // Returns whether the user is authenticated and if they have restrictions (free or unauthenticated).
   getUserPlan(): Observable<{ isAuthenticated: boolean; plan: string | null; hasRestrictions: boolean }> {
     return this.http.get<{ isAuthenticated: boolean; plan: string | null; hasRestrictions: boolean }>(
       `${BACKEND_URL}/user/user-plan`
     );
   }
 
-  /**
-   * Fetches the user's current credit balances from the backend.
-   * Returns an observable that emits the credit details.
-   */
+  // Fetches the user's current credit balances from the backend.
+  // Returns an observable that emits the credit details.
   getCredits(): Observable<{ plan?: string; creditsPermanent: number; creditsDaily: number; creditsDailyExpiresAt: string | null }> {
     return this.http.get<{ plan?: string; creditsPermanent: number; creditsDaily: number; creditsDailyExpiresAt: string | null }>(
       `${BACKEND_URL}/user/credits`
     );
   }
 
-  /**
-   * Checks if the user has enough credits available to create a melody.
-   * Returns an observable that emits the credit availability details.
-   */
+  // Checks if the user has enough credits available to create a melody.
+  // Returns an observable that emits the credit availability details.
   checkCreditsAvailable(amount: number): Observable<{ 
     hasEnoughCredits: boolean; 
     plan?: string; 
@@ -121,9 +104,7 @@ export class UserService {
     );
   }
 
-  /**
-   * Triggers a refresh of user data (useful after backend operations that modify user state)
-   */
+  // Triggers a refresh of user data (useful after backend operations that modify user state)
   refreshUser(): void {
     this.getUser(true).subscribe(() => {
       // Emit credit update event to notify components
@@ -131,9 +112,7 @@ export class UserService {
     });
   }
 
-  /**
-   * Clears the cached user data (called on logout)
-   */
+  // Clears the cached user data (called on logout)
   clearUser(): void {
     this.user.next(null);
     this.inFlightRequest = null;

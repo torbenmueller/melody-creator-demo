@@ -31,8 +31,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     const state = (this.location as any).getState();
     this.plan = state?.plan;
     this.response = state?.response;
-
-    console.log('Checkout - Plan:', this.plan, 'Response:', this.response);
   }
 
   openCheckout(): void {

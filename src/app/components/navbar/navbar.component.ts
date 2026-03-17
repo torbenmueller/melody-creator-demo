@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit, DOCUMENT } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, DOCUMENT } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,11 +13,13 @@ import { StringUtilsService } from '../../services/string-utils.service';
     selector: 'app-navbar',
     imports: [RouterLink, RouterLinkActive, MatDialogModule, MatButtonModule, NgClass],
     templateUrl: './navbar.component.html',
-    styleUrl: './navbar.component.css'
+  styleUrl: './navbar.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   userIsAuthenticated: boolean = false;
-  private authListenerSubs!: Subscription ;
+  private authListenerSubs!: Subscription;
+  private creditUpdateSub?: Subscription;
 
   countdown: any;
   minutes: number = 0;
@@ -32,7 +34,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private dialog: MatDialog,
     @Inject(DOCUMENT) private document: Document,
-    private stringUtils: StringUtilsService
+    private stringUtils: StringUtilsService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -60,13 +63,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
           this.userCredits = 0;
           this.isUsingDailyCredits = false;
         }
+        this.cdr.markForCheck();
       });
     
     // Listen for credit updates and refresh credits when they change
-    this.userService.creditUpdate$.subscribe(() => {
+    this.creditUpdateSub = this.userService.creditUpdate$.subscribe(() => {
       if (this.userIsAuthenticated) {
         this.getUser();
       }
+      this.cdr.markForCheck();
     });
   }
 
@@ -101,11 +106,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
           this.userCredits = credits.creditsPermanent || 0;
           this.isUsingDailyCredits = false;
         }
+        this.cdr.markForCheck();
       },
       error: () => {
         this.userPlan = '';
         this.userCredits = 0;
         this.isUsingDailyCredits = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -122,6 +129,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.authListenerSubs?.unsubscribe();
+    this.creditUpdateSub?.unsubscribe();
     clearInterval(this.countdown);
   }
 

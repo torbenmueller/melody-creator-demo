@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
-import { Component, ElementRef, HostListener, PLATFORM_ID, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, PLATFORM_ID, inject } from '@angular/core';
 import { Settings } from '../../interfaces/settings';
 import { Subscription } from 'rxjs';
 import { CreationService } from '../../services/creation.service';
@@ -17,7 +17,8 @@ import { MatModalComponent } from '../mat-modal/mat-modal.component';
     selector: 'app-settings',
     imports: [FormsModule, ScoreComponent, SettingComponent],
     templateUrl: './settings.component.html',
-    styleUrl: './settings.component.css'
+  styleUrl: './settings.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingsComponent {
   private readonly platformId = inject(PLATFORM_ID);
@@ -108,6 +109,7 @@ export class SettingsComponent {
   isPlaying: boolean = false;
 
   private authListenerSubs!: Subscription;
+  private isPlayingSub?: Subscription;
   private readonly UNAUTHORIZED_MELODY_COUNT_KEY = 'unauthorizedMelodyCount';
 
   constructor(
@@ -115,7 +117,8 @@ export class SettingsComponent {
     private authService: AuthService,
     private userService: UserService,
     private toastr: ToastrService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -131,9 +134,11 @@ export class SettingsComponent {
           this.creationService.melodyCreatedWhileAuthenticated = false;
         }
         this.loadUserPlanAndApplyRestrictions();
+        this.cdr.markForCheck();
       });
-    this.creationService.isPlaying.subscribe((e) => {
+    this.isPlayingSub = this.creationService.isPlaying.subscribe((e) => {
       this.isPlaying = e;
+      this.cdr.markForCheck();
     });
     this.settings = this.creationService.getSettings();
     this.melody = this.creationService.getMelody();
@@ -157,12 +162,14 @@ export class SettingsComponent {
         this.userPlan = response.plan;
         this.hasRestrictions = response.hasRestrictions;
         this.applyRestrictions();
+        this.cdr.markForCheck();
       },
       error: (error: any) => {
         console.error('Failed to fetch user plan', error);
         // Default to restrictions if error
         this.hasRestrictions = true;
         this.applyRestrictions();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -201,6 +208,7 @@ export class SettingsComponent {
 
   ngOnDestroy(): void {
     this.authListenerSubs?.unsubscribe();
+    this.isPlayingSub?.unsubscribe();
   }
 
   onSubmit() {
@@ -224,11 +232,13 @@ export class SettingsComponent {
           this.isLoading = false;
           this.toastr.error(`Cannot create melody: ${response.message || 'Insufficient credits'}`);
         }
+        this.cdr.markForCheck();
       },
       error: (error: any) => {
         this.isLoading = false;
         console.error('Failed to check credits', error);
         this.toastr.error('Error checking credits. Please try again.');
+        this.cdr.markForCheck();
       }
     });
   }
@@ -237,7 +247,6 @@ export class SettingsComponent {
     this.creationService.submitSettings(this.settings, this.userIsAuthenticated).subscribe({
       next: (result) => {
         this.melody = result.melody;
-        console.log("melody", this.melody);
         this.intervals = result.intervals;
         this.isLoading = false;
         this.melodyDescription = this.setDescription(result.settings);
@@ -251,6 +260,7 @@ export class SettingsComponent {
           // Track unauthorized melody creation and show registration prompt after 3
           this.trackUnauthorizedMelodyCreation();
         }
+        this.cdr.markForCheck();
       },
       error: (error: any) => {
         this.isLoading = false;
@@ -263,6 +273,7 @@ export class SettingsComponent {
         } else {
           this.toastr.error('Error generating melody. Please try again.');
         }
+        this.cdr.markForCheck();
       }
     });
   }

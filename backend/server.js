@@ -2,6 +2,12 @@ const express = require('express');
 const app = express();
 const port = 3000;
 const mongoose = require('mongoose');
+let compression = null;
+try {
+	compression = require('compression');
+} catch (error) {
+	compression = null;
+}
 
 const melodiesRoutes = require('./routes/melodies');
 const userRoutes = require('./routes/user');
@@ -18,8 +24,21 @@ const connectToDatabase = async () => {
 
 connectToDatabase();
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.disable('x-powered-by');
+
+if (compression) {
+	app.use(compression());
+}
+
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+app.use(express.json({ limit: '100kb' }));
+
+app.use((req, res, next) => {
+	res.setHeader('X-Content-Type-Options', 'nosniff');
+	res.setHeader('X-Frame-Options', 'DENY');
+	res.setHeader('Referrer-Policy', 'no-referrer');
+	next();
+});
 
 app.use((req, res, next) => {
 	res.setHeader('Access-Control-Allow-Origin', '*');

@@ -24,7 +24,6 @@ export class MatModalComponent {
 
   onPurchaseCredits(amount: number) {
     // Placeholder for purchase logic - would integrate with payment system
-    console.log('Purchasing credits:', amount);
     this.dialogRef.close({ purchased: true, amount });
   }
 }

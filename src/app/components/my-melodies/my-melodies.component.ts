@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CreationService } from '../../services/creation.service';
 import { ToastrService } from 'ngx-toastr';
@@ -16,6 +16,7 @@ import { PLATFORM_ID, inject } from '@angular/core';
     imports: [NgClass, DatePipe, ScoreComponent, FormsModule],
     templateUrl: './my-melodies.component.html',
     styleUrl: './my-melodies.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
     animations: [
         trigger('slideDown', [
             transition(':enter', [
@@ -31,7 +32,8 @@ import { PLATFORM_ID, inject } from '@angular/core';
 })
 export class MyMelodiesComponent implements OnInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
-  private melodiesSub!: Subscription;
+  private melodiesSub?: Subscription;
+  private isPlayingSub?: Subscription;
   melodies: any[] = [];
   totalMelodies: number = 0;
   melodiesPerPage: number = 10;
@@ -71,21 +73,33 @@ export class MyMelodiesComponent implements OnInit, OnDestroy {
     public creationService: CreationService,
     public musicxmlConverterService: MusicxmlConverterService,
     private toastr: ToastrService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.melodiesSub = this.creationService
+      .getMelodiesUpdateListener()
+      .subscribe((data: { melodies: any; melodiesCount: number }) => {
+        this.melodies = data.melodies;
+        this.totalMelodies = data.melodiesCount;
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      });
+
     this.load();
-    this.creationService.isPlaying.subscribe((e) => {
+    this.isPlayingSub = this.creationService.isPlaying.subscribe((e) => {
       this.isPlaying = e;
       if (!e) {
         this.playingMelodyId = null;
       }
+      this.cdr.markForCheck();
     });
   }
 
   ngOnDestroy(): void {
     this.melodiesSub?.unsubscribe();
+    this.isPlayingSub?.unsubscribe();
   }
 
   load() {
@@ -95,14 +109,12 @@ export class MyMelodiesComponent implements OnInit, OnDestroy {
       this.currentPage,
       this.sortByType,
       this.order
-    );
-    this.melodiesSub = this.creationService
-      .getMelodiesUpdateListener()
-      .subscribe((data: { melodies: any; melodiesCount: number }) => {
-        this.melodies = data.melodies;
-        this.totalMelodies = data.melodiesCount;
+    ).subscribe({
+      error: () => {
         this.isLoading = false;
-      });
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   showMelody(melody: any): void {
@@ -115,7 +127,6 @@ export class MyMelodiesComponent implements OnInit, OnDestroy {
   }
 
   downloadMelodyAsXML(melody: any): void {
-    console.log(melody)
     this.musicxmlConverterService.downloadMusicXml(
       melody.melody,
       melody.settings.name,
@@ -180,11 +191,18 @@ export class MyMelodiesComponent implements OnInit, OnDestroy {
           this.currentPage,
           this.sortByType,
           this.order
-        );
+        ).subscribe({
+          error: () => {
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          }
+        });
         this.showSuccess();
+        this.cdr.markForCheck();
       },
       () => {
         this.isLoading = false;
+        this.cdr.markForCheck();
       }
     );
   }
@@ -244,7 +262,12 @@ export class MyMelodiesComponent implements OnInit, OnDestroy {
       this.currentPage,
       this.sortByType,
       this.order
-    );
+    ).subscribe({
+      error: () => {
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   prevPage() {
@@ -286,11 +309,18 @@ export class MyMelodiesComponent implements OnInit, OnDestroy {
           this.currentPage,
           this.sortByType,
           this.order
-        );
+        ).subscribe({
+          error: () => {
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          }
+        });
+        this.cdr.markForCheck();
       },
       error: (error) => {
         this.toastr.error('Failed to update melody name');
         console.error('Update error:', error);
+        this.cdr.markForCheck();
       }
     });
   }

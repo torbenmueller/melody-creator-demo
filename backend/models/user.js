@@ -29,4 +29,12 @@ const userSchema = mongoose.Schema({
 	passwordChangeRequestsCount: { type: Number, default: 0 }
 });
 
+// Fast path for auth and account uniqueness checks.
+userSchema.index({ email: 1 }, { unique: true });
+
+// Token lookup endpoints rely on these fields.
+userSchema.index({ resetToken: 1, resetTokenExpiration: 1 });
+userSchema.index({ emailVerificationToken: 1, emailVerificationTokenExpiration: 1 });
+userSchema.index({ pendingEmailToken: 1, pendingEmailTokenExpiration: 1 });
+
 module.exports = mongoose.model('User', userSchema);

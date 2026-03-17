@@ -18,13 +18,14 @@ exports.generateMelody = async (req, res, next) => {
 		}
 
 		let userPlan = null;
+		let authenticatedUser = null;
 		
 		// Check if user is authenticated
 		if (req.userData?.userId) {
-			const user = await User.findById(req.userData.userId);
-			if (user) {
-				await checkAndDowngradeExpiredPlan(user);
-				userPlan = user.plan;
+			authenticatedUser = await User.findById(req.userData.userId);
+			if (authenticatedUser) {
+				await checkAndDowngradeExpiredPlan(authenticatedUser);
+				userPlan = authenticatedUser.plan;
 			}
 		}
 		
@@ -39,11 +40,8 @@ exports.generateMelody = async (req, res, next) => {
 		const result = generator.generateMelody(settings);
 		
 		// Consume credit if authenticated
-		if (req.userData?.userId) {
-			const user = await User.findById(req.userData.userId);
-			if (user) {
-				await consumeCredit(user);
-			}
+		if (authenticatedUser) {
+			await consumeCredit(authenticatedUser);
 		}
 		
 		return res.status(200).json({
